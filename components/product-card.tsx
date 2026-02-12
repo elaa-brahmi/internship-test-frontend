@@ -4,16 +4,8 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Check } from 'lucide-react'
-
-interface Product {
-  id: string
-  name: string
-  price: number
-  image: string
-  stock: number
-  rating?: number
-  reviews?: number
-}
+import { Product } from '@/types/product'
+import { cartService } from '@/services/cartService'
 
 interface ProductCardProps {
   product: Product
@@ -21,21 +13,29 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false)
+  const [loading, setLoading] = useState(false)
   const isOutOfStock = product.stock === 0
 
-  const handleAddToCart = () => {
-    if (!isOutOfStock) {
+  const handleAddToCart = async () => {
+    if (isOutOfStock || loading) return;
+
+    try {
+      setLoading(true)
+      await cartService.addToCart({ productId: product.id })
       setIsAdded(true)
       setTimeout(() => setIsAdded(false), 2000)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Error adding to cart')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card hover:shadow-lg transition-shadow duration-300">
-      {/* Product Image */}
       <div className="relative overflow-hidden bg-secondary h-48 sm:h-56">
         <Image
-          src={product.image}
+          src={product.image_url}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -47,71 +47,22 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
 
-      {/* Product Info */}
       <div className="flex flex-col flex-grow p-4 sm:p-5">
-        {/* Rating */}
-        {product.rating && (
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <span key={i}>
-                  {i < Math.floor(product.rating!) ? '★' : '☆'}
-                </span>
-              ))}
-            </div>
-            {product.reviews && (
-              <span className="text-sm text-muted-foreground">
-                ({product.reviews})
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Title */}
-        <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-          {product.name}
-        </h3>
-
-        {/* Stock Info */}
-        {product.stock > 0 && product.stock <= 5 && (
-          <p className="text-xs text-destructive font-medium mb-2">
-            Only {product.stock} left in stock
-          </p>
-        )}
-
-        {/* Spacer */}
+        <h3 className="font-semibold text-foreground mb-2 line-clamp-2">{product.name}</h3>
+        
         <div className="flex-grow" />
 
-        {/* Price and Button */}
         <div className="flex items-end justify-between gap-3">
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-foreground">
-              ${product.price}
-            </span>
-          </div>
-
+          <span className="text-2xl font-bold text-foreground">${product.price}</span>
           <Button
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={isOutOfStock || loading}
             variant={isAdded ? 'default' : 'outline'}
             size="sm"
-            className={`transition-all duration-300 ${
-              isOutOfStock
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
           >
-            {isAdded ? (
-              <>
-                <Check className="w-4 h-4" />
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4" />
-              </>
-            )}
-            <span className="hidden sm:inline">
-              {isAdded ? 'Added' : 'Add'}
+            {isAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+            <span className="ml-2 hidden sm:inline">
+              {loading ? 'Adding...' : isAdded ? 'Added' : 'Add'}
             </span>
           </Button>
         </div>
