@@ -1,18 +1,35 @@
 'use client'
 
+import { useState } from 'react'
 import { Product } from '@/types/product'
 import { Button } from '@/components/ui/button'
-import { ShoppingCart, X } from 'lucide-react'
+import { ShoppingCart, X, Loader2 } from 'lucide-react'
 
 interface ProductDetailModalProps {
   product: Product
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (product: Product) => void
+  onAddToCart: (product: Product) => Promise<void>
 }
 
 export function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: ProductDetailModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   if (!isOpen) return null
+
+  const handleAddAndClose = async () => {
+    try {
+      setIsSubmitting(true)
+      
+      await onAddToCart(product)
+      
+      onClose()
+    } catch (error) {
+      console.error("Failed to add to cart:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -29,7 +46,7 @@ export function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: Pr
             <img
               src={product.image_url}
               alt={product.name}
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
 
@@ -42,7 +59,9 @@ export function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: Pr
             <div className="mt-4 flex items-center gap-4">
               <span className="text-3xl font-bold text-foreground">${product.price}</span>
               {product.stock > 0 ? (
-                <span className="text-green-600 text-sm font-medium">In Stock ({product.stock})</span>
+                <span className="text-green-600 text-sm font-medium">
+                  In Stock ({product.stock})
+                </span>
               ) : (
                 <span className="text-destructive text-sm font-medium">Out of Stock</span>
               )}
@@ -56,12 +75,17 @@ export function ProductDetailModal({ product, isOpen, onClose, onAddToCart }: Pr
               <Button 
                 size="lg" 
                 className="w-full gap-3 text-lg h-14"
-                disabled={product.stock === 0}
-                onClick={() => onAddToCart(product)}
+                disabled={product.stock === 0 || isSubmitting}
+                onClick={handleAddAndClose}
               >
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
+                {isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5" />
+                )}
+                {isSubmitting ? 'Adding...' : 'Add to Cart'}
               </Button>
+             
             </div>
           </div>
         </div>
