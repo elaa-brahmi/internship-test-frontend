@@ -14,5 +14,22 @@ export const productService = {
     const response = await fetch(`${API_URL}/products/${id}`);
     if (!response.ok) throw new Error('Product not found');
     return response.json();
+  },
+  async createProduct(product: Omit<Product, 'id'>): Promise<Product> {
+    const res = await fetch(`${API_URL}/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product),
+    });
+    return res.json();
+  },
+
+  async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
+    const res = await fetch(`${API_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product),
+    });
+    return res.json();
   }
 };
