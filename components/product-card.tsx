@@ -34,10 +34,9 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card hover:shadow-lg transition-shadow duration-300">
       <div className="relative overflow-hidden bg-secondary h-48 sm:h-56">
-        <Image
+        <img
           src={product.image_url}
           alt={product.name}
-          fill
           className="object-cover group-hover:scale-110 transition-transform duration-300"
         />
         {isOutOfStock && (
