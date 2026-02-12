@@ -64,8 +64,7 @@ export default function ProductsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">TechStore v2</h1>
-              <p className="text-sm text-muted-foreground">Premium Cloud-Powered Inventory</p>
+              <h1 className="text-2xl font-bold tracking-tight">TechStore</h1>
             </div>
 
             <div className="flex items-center gap-2">
@@ -95,12 +94,11 @@ export default function ProductsPage() {
         </div>
       </header>
 
-      {/* --- Product Grid --- */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="mt-4 text-muted-foreground">Syncing with Supabase...</p>
+            <p className="mt-4 text-muted-foreground">Syncing...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
